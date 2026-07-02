@@ -1,0 +1,61 @@
+local Events = require(game.ReplicatedStorage.Events)
+local screengui = Instance.new("ScreenGui",game.CoreGui)
+local frame = Instance.new("Frame", screengui)
+--frame params
+frame.Position = UDim2.new(0.094, 0, 0.477, 0)
+frame.Size = UDim2.new(0.2, 0, 0.3, 0)
+local button = Instance.new("TextButton", frame)
+local textbox = Instance.new("TextBox", frame)
+local dragdet = Instance.new("UIDragDetector", frame)
+local grad = Instance.new("UIGradient", frame)
+local corn = Instance.new("UICorner", frame)
+local colorTable = {}
+local colors = {Color3.fromHex("#4d009a"), Color3.fromHex("#ee00ff"), Color3.fromHex("#8c00ff")}
+for i=0, #colors - 1 do
+	table.insert(colorTable, ColorSequenceKeypoint.new(i/(#colors - 1), colors[i+1]))
+end
+grad.Color = ColorSequence.new(colorTable)
+grad.Rotation = 70
+grad.Transparency = NumberSequence.new(0.5)
+corn.CornerRadius = UDim.new(0.05,0)
+--button params
+button.Position = UDim2.new(0.184, 0, 0.617, 0)
+button.Size = UDim2.new(0.63, 0, 0.27, 0)
+button.Text = "Drop"
+button.TextScaled = true
+button.TextColor3 = Color3.fromHex("#903e99")
+local grad0 = Instance.new("UIGradient", button)
+local colorTable0 = {}
+local colors0 = {Color3.fromHex("#de61f4"), Color3.fromHex("#f1a5ff"), Color3.fromHex("#f47bff")}
+local corn0 = Instance.new("UICorner", button)
+for i=0, #colors0 - 1 do
+	table.insert(colorTable0, ColorSequenceKeypoint.new(i/(#colors0 - 1), colors0[i+1]))
+end
+grad0.Color = ColorSequence.new(colorTable0)
+grad0.Rotation = 84
+grad0.Transparency = NumberSequence.new(0.2)
+corn0.CornerRadius = UDim.new(0.1,0)
+--textbox params
+textbox.Position = UDim2.new(0.184, 0, 0.297, 0)
+textbox.Size = UDim2.new(0.63, 0, 0.27, 0)
+textbox.TextScaled = true
+textbox.PlaceholderText = "Item Name"
+textbox.PlaceholderColor3 = Color3.fromHex("#bc9cc8")
+textbox.Text = ""
+textbox.TextColor3 = Color3.fromHex("#903e99")
+local grad1 = Instance.new("UIGradient", textbox)
+local corn1 = Instance.new("UICorner", textbox)
+grad1.Color = ColorSequence.new(colorTable0)
+grad1.Rotation = 84
+grad1.Transparency = NumberSequence.new(0.2)
+corn1.CornerRadius = UDim.new(0.1,0)
+--function
+button.MouseButton1Click:Connect(function()
+	for i=1,math.clamp(game.Players.LocalPlayer.Items[textbox.Text].Value, 0, 15) do
+		Events.Get("Equip"):FireServer(textbox.Text)
+		Events.Get("LocalEquip"):Fire(textbox.Text)
+		task.wait(0.2)
+		Events.Get("Drop"):FireServer(textbox.Text)
+		task.wait(0.2)
+	end
+end)
