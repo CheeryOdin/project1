@@ -69,7 +69,7 @@ grad2.Transparency = NumberSequence.new(0.9)
 local corn2 = Instance.new("UICorner", scrlfr)
 corn2.CornerRadius = UDim.new(0.1, 0)
 --search function
-local items = workspace.Items -- CHANGE THIS
+local items = game.Players.LocalPlayer.Items
 local function Change()
 	scrlfr.Interactable = not scrlfr.Interactable
 	scrlfr.Visible = not scrlfr.Visible
