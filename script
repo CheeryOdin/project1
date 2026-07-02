@@ -7,6 +7,7 @@ frame.Size = UDim2.new(0.2, 0, 0.3, 0)
 local button = Instance.new("TextButton", frame)
 local textbox = Instance.new("TextBox", frame)
 local textlab = Instance.new("TextLabel", frame)
+local imbut = Instance.new("ImageButton", frame)
 local scrlfr = Instance.new("ScrollingFrame", frame)
 local dragdet = Instance.new("UIDragDetector", frame)
 local grad = Instance.new("UIGradient", frame)
@@ -68,13 +69,22 @@ grad2.Color = ColorSequence.new(colorTable0)
 grad2.Transparency = NumberSequence.new(0.9)
 local corn2 = Instance.new("UICorner", scrlfr)
 corn2.CornerRadius = UDim.new(0.1, 0)
---search function
-local items = game.Players.LocalPlayer.Items
+--imbut params
+imbut.Position = UDim2.new(0.014, 0, 0.33, 0)
+imbut.Size = UDim2.new(0.161, 0, 0.181, 0)
+imbut.BackgroundTransparency = 1
+imbut.HoverImage = "rbxassetid://113714411548918"
+imbut.Image = "rbxassetid://121053973772796"
+imbut.ImageColor3 = Color3.fromHex("#ec1bff")
 local function Change()
 	scrlfr.Interactable = not scrlfr.Interactable
 	scrlfr.Visible = not scrlfr.Visible
 end
+imbut.MouseButton1Up:Connect(Change)
+--search function
+local items = game.Players.LocalPlayer.Items
 local function Update()
+	if not scrlfr.Visible then return end
 	if #scrlfr:GetChildren() > 2 then
 		for _, v in scrlfr:GetChildren() do
 			if v:IsA("TextButton") then
@@ -99,13 +109,11 @@ local function Update()
 			button123.BackgroundTransparency = 0.95
 			button123.MouseButton1Click:Connect(function()
 				textbox.Text = item.Name
-				Change()
 			end)
 			buttons += 1
 		end
 	end
 end
-textbox.Focused:Connect(Change)
 textbox.Changed:Connect(Update)
 --function
 button.MouseButton1Click:Connect(function()
@@ -116,4 +124,71 @@ button.MouseButton1Click:Connect(function()
 		Events.Get("Drop"):FireServer(textbox.Text)
 		task.wait(0.2)
 	end
+end)
+--frame0 params
+local frame0 = Instance.new("Frame",screengui)
+frame0.Visible = false
+frame0.Position = UDim2.new(0.067, 0, 0.744, 0)
+frame0.Size = UDim2.new(0.197, 0, 0.256, 0)
+local dragdet0 = Instance.new("UIDragDetector", frame0)
+local corn3 = Instance.new("UICorner", frame0)
+local grad3 = Instance.new("UIGradient", frame0)
+corn3.CornerRadius = UDim.new(0.05,0)
+grad3.Transparency = NumberSequence.new(0.5)
+grad3.Rotation = 70
+grad3.Color = ColorSequence.new(colorTable)
+--imbut0 params
+local imbut0 = Instance.new("ImageButton", frame)
+imbut0.Position = UDim2.new(0, 0, -0.005, 0)
+imbut0.Size = UDim2.new(0.166, 0, 0.181, 0)
+imbut0.BackgroundTransparency = 1
+imbut0.HoverImage = "rbxassetid://6918434507"
+imbut0.Image = "rbxassetid://2484556379"
+imbut0.ImageColor3 = Color3.fromHex("#9c39ff")
+imbut0.MouseButton1Up:Connect(function()
+	frame0.Visible = not frame0.Visible
+end)
+--checkmark params
+local checkmark = Instance.new("ImageButton", frame0)
+checkmark.Position = UDim2.new(0.057, 0, 0.119, 0)
+checkmark.Size = UDim2.new(0.096, 0, 0.124, 0)
+checkmark.BackgroundTransparency = 1
+checkmark.Image = "rbxassetid://5228818459"
+local val = Instance.new("BoolValue", checkmark)
+val.Value = false
+checkmark.MouseButton1Up:Connect(function()
+	if checkmark.Image == "rbxassetid://5228818459" then
+		checkmark.Image = "rbxassetid://9754130783"
+	else
+		checkmark.Image = "rbxassetid://5228818459"
+	end
+	val.Value = not val.Value
+end)
+--checkmtext params
+local checkmtext = Instance.new("TextLabel", checkmark)
+checkmtext.Position = UDim2.new(1.641, 0, -0.337, 0)
+checkmtext.Size = UDim2.new(7.204, 0, 1.625, 0)
+checkmtext.BackgroundTransparency = 1
+checkmtext.TextColor3 = Color3.new(255,255,255)
+checkmtext.TextScaled = true
+checkmtext.Text = "Anti Grab"
+--antigrab func
+val:IsA("Model")
+local function Proc(v)
+	if not val.Value then return end
+	if v:WaitForChild("Owner").Value == game.Players.LocalPlayer then
+		v.Handle:WaitForChild("TouchInterest"):Destroy()
+	end
+end
+local function ProcT(tabl)
+	if not val.Value then return end
+	for _, v in tabl do
+		if v.Owner.Value == game.Players.LocalPlayer then
+			v.Handle.TouchInterest:Destroy()
+		end
+	end
+end
+workspace.Dropped.ChildAdded:Connect(Proc)
+val.Changed:Connect(function()
+	ProcT(workspace.Dropped:GetChildren())
 end)
