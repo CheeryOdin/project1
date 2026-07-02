@@ -7,6 +7,7 @@ frame.Size = UDim2.new(0.2, 0, 0.3, 0)
 local button = Instance.new("TextButton", frame)
 local textbox = Instance.new("TextBox", frame)
 local textlab = Instance.new("TextLabel", frame)
+local scrlfr = Instance.new("ScrollingFrame", frame)
 local dragdet = Instance.new("UIDragDetector", frame)
 local grad = Instance.new("UIGradient", frame)
 local corn = Instance.new("UICorner", frame)
@@ -57,6 +58,55 @@ textlab.BackgroundTransparency = 1
 textlab.TextColor3 = Color3.fromHex("#903e99")
 textlab.TextScaled = true
 textlab.Text = "Auto Drop by CheeryOdin"
+--scrlfr params
+scrlfr.Position = UDim2.new(0.861, 0, 0.292, 0)
+scrlfr.Size = UDim2.new(0.567, 0, 0.794, 0)
+scrlfr.Interactable = false
+scrlfr.Visible = false
+local grad2 = Instance.new("UIGradient", scrlfr)
+grad2.Color = ColorSequence.new(colorTable0)
+grad2.Transparency = NumberSequence.new(0.9)
+local corn2 = Instance.new("UICorner", scrlfr)
+corn2.CornerRadius = UDim.new(0.1, 0)
+--search function
+local items = workspace.Items -- CHANGE THIS
+local function Change()
+	scrlfr.Interactable = not scrlfr.Interactable
+	scrlfr.Visible = not scrlfr.Visible
+end
+local function Update()
+	if #scrlfr:GetChildren() > 2 then
+		for _, v in scrlfr:GetChildren() do
+			if v:IsA("TextButton") then
+				v:Destroy()
+				task.wait()
+			end
+		end
+	end
+	local text = string.lower(textbox.Text)
+	if text == "" then return end
+	local buttons = 0
+	local posY = 0.02
+	for i, item in items:GetChildren() do
+		if buttons >= 10 then break end
+		local name = string.lower(item.Name)
+		if string.find(name, text) then
+			local button123 = Instance.new("TextButton", scrlfr)
+			button123.Position = UDim2.new(0.08, 0, posY + 0.1 * buttons, 0)
+			button123.Size = UDim2.new(0.8, 0, 0.08, 0)
+			button123.Text = item.Name
+			button123.TextScaled = true
+			button123.BackgroundTransparency = 0.95
+			button123.MouseButton1Click:Connect(function()
+				textbox.Text = item.Name
+				Change()
+			end)
+			buttons += 1
+		end
+	end
+end
+textbox.Focused:Connect(Change)
+textbox.Changed:Connect(Update)
 --function
 button.MouseButton1Click:Connect(function()
 	for i=1,math.clamp(game.Players.LocalPlayer.Items[textbox.Text].Value, 0, 15) do
