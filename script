@@ -176,16 +176,12 @@ checkmtext.Text = "Anti Grab"
 val:IsA("Model")
 local function Proc(v)
 	if not val.Value then return end
-	if v:WaitForChild("Owner").Value == game.Players.LocalPlayer then
-		v.Handle:WaitForChild("TouchInterest"):Destroy()
-	end
+	v.Handle:WaitForChild("TouchInterest"):Destroy()
 end
 local function ProcT(tabl)
 	if not val.Value then return end
 	for _, v in tabl do
-		if v.Owner.Value == game.Players.LocalPlayer then
-			v.Handle.TouchInterest:Destroy()
-		end
+		v.Handle.TouchInterest:Destroy()
 	end
 end
 workspace.Dropped.ChildAdded:Connect(Proc)
