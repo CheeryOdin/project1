@@ -49,6 +49,13 @@ grad1.Color = ColorSequence.new(colorTable0)
 grad1.Rotation = 84
 grad1.Transparency = NumberSequence.new(0.2)
 corn1.CornerRadius = UDim.new(0.1,0)
+--textlab params
+textlab.Position = UDim2.new(0.181, 0, 0.067, 0)
+textlab.Size = UDim2.new(0.65, 0, 0.2, 0)
+textlab.BackgroundTransparency = 1
+textlab.TextColor3 = Color3.fromHex("#903e99")
+textlab.TextScaled = true
+textlab.Text = "Auto Drop by CheeryOdin"
 --function
 button.MouseButton1Click:Connect(function()
 	for i=1,math.clamp(game.Players.LocalPlayer.Items[textbox.Text].Value, 0, 15) do
