@@ -125,6 +125,8 @@ button.MouseButton1Click:Connect(function()
 		task.wait(0.2)
 	end
 end)
+
+
 --frame0 params
 local frame0 = Instance.new("Frame",screengui)
 frame0.Visible = false
@@ -188,3 +190,101 @@ workspace.Dropped.ChildAdded:Connect(Proc)
 val.Changed:Connect(function()
 	ProcT(workspace.Dropped:GetChildren())
 end)
+--checkmark0 params
+local checkmark0 = Instance.new("ImageButton", frame0)
+checkmark0.Position = UDim2.new(0.066, 0, 0.278, 0)
+checkmark0.Size = UDim2.new(0.087, 0, 0.124, 0)
+checkmark0.BackgroundTransparency = 1
+checkmark0.Image = "rbxassetid://5228818459"
+local val0 = Instance.new("BoolValue", checkmark0)
+val0.Value = false
+checkmark0.MouseButton1Up:Connect(function()
+	if checkmark0.Image == "rbxassetid://5228818459" then
+		checkmark0.Image = "rbxassetid://9754130783"
+	else
+		checkmark0.Image = "rbxassetid://5228818459"
+	end
+	val0.Value = not val0.Value
+end)
+--checkmtext0 params
+local checkmtext0 = Instance.new("TextLabel", checkmark0)
+checkmtext0.Position = UDim2.new(1.641, 0, -0.337, 0)
+checkmtext0.Size = UDim2.new(7.204, 0, 1.625, 0)
+checkmtext0.BackgroundTransparency = 1
+checkmtext0.TextColor3 = Color3.new(255,255,255)
+checkmtext0.TextScaled = true
+checkmtext0.Text = "Anti Sit"
+--antisit func
+game.Players.LocalPlayer.Character.Humanoid:GetPropertyChangedSignal("Sit"):Connect(function()
+	if val0.Value then
+		if game.Players.LocalPlayer.Character.Humanoid.Sit then
+			game.Players.LocalPlayer.Character.Humanoid.Sit = false
+		end
+	end
+end)
+--checkmark1 params
+local checkmark1 = Instance.new("ImageButton", frame0)
+checkmark1.Position = UDim2.new(0.066, 0, 0.438, 0)
+checkmark1.Size = UDim2.new(0.087, 0, 0.124, 0)
+checkmark1.BackgroundTransparency = 1
+checkmark1.Image = "rbxassetid://5228818459"
+checkmark1.MouseButton1Up:Connect(function()
+	if checkmark1.Image == "rbxassetid://5228818459" then
+		checkmark1.Image = "rbxassetid://9754130783"
+	else
+		checkmark1.Image = "rbxassetid://5228818459"
+	end
+	game.Players.LocalPlayer:SetAttribute("VIP", not game.Players.LocalPlayer:GetAttribute("VIP"))
+end)
+--checkmtext1 params
+local checkmtext1 = Instance.new("TextLabel", checkmark1)
+checkmtext1.Position = UDim2.new(1.641, 0, -0.337, 0)
+checkmtext1.Size = UDim2.new(7.204, 0, 1.625, 0)
+checkmtext1.BackgroundTransparency = 1
+checkmtext1.TextColor3 = Color3.new(255,255,255)
+checkmtext1.TextScaled = true
+checkmtext1.Text = "VIP"
+--checkmark2 params
+local checkmark2 = Instance.new("ImageButton", frame0)
+checkmark2.Position = UDim2.new(0.066, 0, 0.597, 0)
+checkmark2.Size = UDim2.new(0.087, 0, 0.124, 0)
+checkmark2.BackgroundTransparency = 1
+checkmark2.Image = "rbxassetid://5228818459"
+checkmark2.MouseButton1Up:Connect(function()
+	if checkmark2.Image == "rbxassetid://5228818459" then
+		checkmark2.Image = "rbxassetid://9754130783"
+	else
+		checkmark2.Image = "rbxassetid://5228818459"
+	end
+	game.Players.LocalPlayer.XRay.Value = not game.Players.LocalPlayer.XRay.Value
+end)
+--checkmtext2 params
+local checkmtext2 = Instance.new("TextLabel", checkmark2)
+checkmtext2.Position = UDim2.new(1.641, 0, -0.337, 0)
+checkmtext2.Size = UDim2.new(7.204, 0, 1.625, 0)
+checkmtext2.BackgroundTransparency = 1
+checkmtext2.TextColor3 = Color3.new(255,255,255)
+checkmtext2.TextScaled = true
+checkmtext2.Text = "XRay"
+--checkmark3 params
+local checkmark3 = Instance.new("ImageButton", frame0)
+checkmark3.Position = UDim2.new(0.066, 0, 0.757, 0)
+checkmark3.Size = UDim2.new(0.087, 0, 0.124, 0)
+checkmark3.BackgroundTransparency = 1
+checkmark3.Image = "rbxassetid://5228818459"
+checkmark3.MouseButton1Up:Connect(function()
+	if checkmark3.Image == "rbxassetid://5228818459" then
+		checkmark3.Image = "rbxassetid://9754130783"
+	else
+		checkmark3.Image = "rbxassetid://5228818459"
+	end
+	game.Players.LocalPlayer.Character.PrimaryPart.Anchored = not game.Players.LocalPlayer.Character.PrimaryPart.Anchored
+end)
+--checkmtext3 params
+local checkmtext3 = Instance.new("TextLabel", checkmark3)
+checkmtext3.Position = UDim2.new(1.641, 0, -0.337, 0)
+checkmtext3.Size = UDim2.new(7.204, 0, 1.625, 0)
+checkmtext3.BackgroundTransparency = 1
+checkmtext3.TextColor3 = Color3.new(255,255,255)
+checkmtext3.TextScaled = true
+checkmtext3.Text = "Freeze Player"
