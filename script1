@@ -1,0 +1,455 @@
+local Events = require(game.ReplicatedStorage.Events)
+local chr = game.Players.LocalPlayer.Character
+local hum = chr:FindFirstChild("Humanoid")
+local role, item, boardnum, plr2, legitmode, board
+local controls
+local started = Instance.new("BoolValue", chr)
+local inboard = Instance.new("BoolValue", chr)
+local items = 0
+--some core func
+local function goto(destination)
+	print("goto func")
+	if legitmode then
+		hum:MoveTo(destination.Position + Vector3.new(0, 4.25, 0))
+		task.wait(0.5)
+	else
+		chr.PrimaryPart.Anchored = false
+		task.wait(0.1)
+		chr.PrimaryPart.CFrame = destination.CFrame + Vector3.new(0, 4, 0)
+		task.wait(0.1)
+		chr.PrimaryPart.Anchored = true
+		task.wait(0.1)
+		if destination == workpsace.Map.SpawnLocation then
+			chr.PrimaryPart.Anchored = false
+		end
+	end
+end
+local function panic()
+	print("panic func")
+	inboard.Value = false
+	started.Value = false
+	task.wait(0.1)
+	goto(workspace.Map.SpawnLocation)
+end
+local function check()
+	print("check func")
+	if not inboard.Value then return end
+	if started.Value then
+		if board.Player2.Value ~= game.Players[plr2] and board.Player1.Value ~= game.Players[plr2] then
+			inboard.Value = false
+			started.Value = false
+			panic()
+		end
+	else
+		if board.Player2.Value == game.Players[plr2] or board.Player1.Value == game.Players[plr2] then
+			started.Value = true
+		end
+	end
+end
+local function itemsCheck(plr)
+	print("itemcheck func")
+	for _, v in workspace.Dropped:GetChildren() do
+		if v.Owner.Value == plr then
+			items += 1
+		end
+	end
+end
+local function Drop()
+	print("drop func")
+	if items < 15 then
+		for i=1,math.clamp(game.Players.LocalPlayer.Items[item].Value, 0, 15-items) do
+			Events.Get("Equip"):FireServer(item)
+			Events.Get("LocalEquip"):Fire(item)
+			task.wait(0.2)
+			Events.Get("Drop"):FireServer(item)
+			task.wait(0.2)
+		end
+		itemsCheck(game.Players.LocalPlayer)
+		if 15-items ~= 0 then
+			Drop()
+		end
+	else
+		items = 0
+	end
+end
+--GIVER
+--waiting for second player DONE
+--starts give an items until it reaches 15, then press green DONE
+--if receiver leaves from trade, it will stopped DONE
+--if giver haven't these item anymore, he will leave from trade DONE
+local function giver()
+	print("giver func")
+	if not started.Value then
+		inboard.Value = true
+		goto(controls.Done.Pad)
+		task.wait(0.1)
+		board.Player1:GetPropertyChangedSignal("Value"):Connect(check)
+		board.Player2:GetPropertyChangedSignal("Value"):Connect(check)
+		check()
+	else
+		if not inboard.Value then panic(); return end
+		if not game.Players.LocalPlayer.Items:FindFirstChild(item) or game.Players.LocalPlayer.Items[item].Value < 15 then
+			inboard.Value = false
+			started.Value = false
+			panic()
+			return 
+		end
+		Drop()
+		task.wait(0.5)
+		if not inboard.Value then panic(); return end
+		goto(controls.Done.Pad)
+		while not board.TradeFinalizing.Value and inboard.Value do
+			task.wait(0.5)
+			chr.Humanoid.Jump = true
+		end
+		giver()
+	end
+end
+--RECEIVER
+--waiting for second player DONE
+--wait until items reaches 15 and press green, then ~0.5 sec later press red КОСТЫЛЬНУЛ
+--if giver leaves from trade, it will stopped DONE
+local function receiver()
+	print("receiver func")
+	if not started.Value then
+		inboard.Value = true
+		goto(controls.Done.Pad)
+		task.wait(0.1)
+		board.Player2:GetPropertyChangedSignal("Value"):Connect(check)
+		check()
+	else
+		if not inboard.Value then panic(); return end
+		while inboard.Value and started.Value do
+			if not inboard.Value then panic(); break end
+			goto(controls.Done.Pad)
+			task.wait(0.5)
+			chr.Humanoid.Jump = true
+			task.wait(1)
+			goto(controls.Close.Pad)
+			task.wait(0.5)
+			chr.Humanoid.Jump = true
+			task.wait(1)
+		end
+	end
+end
+--ALL
+--default: anchored true, VIP true
+--optional: antisit true, antigrab true
+
+--button func
+started:GetPropertyChangedSignal("Value"):Connect(function()
+	print("started func")
+	if started.Value then
+		if role == "Giver" then
+			giver()
+		else
+			receiver()
+		end
+	end
+end)
+
+
+--THERE WILL BE ALL CODE FOR GUI
+task.wait()
+local screengui = Instance.new("ScreenGui",game.CoreGui)
+local frame = Instance.new("Frame", screengui)
+local frameset = Instance.new("Frame", screengui)
+local guide = Instance.new("ImageLabel", screengui)
+--gradients
+local colorTablefr = {}
+local colorsfr = {Color3.fromHex("#4d009a"), Color3.fromHex("#ee00ff"), Color3.fromHex("#8c00ff")}
+for i=0, #colorsfr - 1 do
+	table.insert(colorTablefr, ColorSequenceKeypoint.new(i/(#colorsfr - 1), colorsfr[i+1]))
+end
+local gradfr = ColorSequence.new(colorTablefr)
+local colorTablebut = {}
+local colorsbut = {Color3.fromHex("#de61f4"), Color3.fromHex("#f1a5ff"), Color3.fromHex("#f47bff")}
+for i=0, #colorsbut - 1 do
+	table.insert(colorTablebut, ColorSequenceKeypoint.new(i/(#colorsbut - 1), colorsbut[i+1]))
+end
+local gradbut = ColorSequence.new(colorTablebut)
+--frame params
+frame.Position = UDim2.new(0.679, 0, 0.556, 0)
+frame.Size = UDim2.new(0.301, 0, 0.435, 0)
+local grad = Instance.new("UIGradient", frame)
+grad.Color = gradfr
+grad.Rotation = 70
+grad.Transparency = NumberSequence.new(0.5)
+local corn = Instance.new("UICorner", frame)
+corn.CornerRadius = UDim.new(0.05,0)
+Instance.new("UIDragDetector", frame)
+local setbut = Instance.new("ImageButton", frame)
+local guidebut = Instance.new("ImageButton", frame)
+local startbut = Instance.new("TextButton", frame)
+local giverbut = Instance.new("TextButton", frame)
+local recbut = Instance.new("TextButton", frame)
+local plrbox = Instance.new("TextBox", frame)
+local brdbox = Instance.new("TextBox", frame)
+local itmbox = Instance.new("TextBox", frame)
+local textlab = Instance.new("TextLabel", frame)
+local textlab0 = Instance.new("TextLabel", frame)
+local textlab1 = Instance.new("TextLabel", frame)
+local textlab2 = Instance.new("TextLabel", frame)
+--textlab params
+textlab.Position = UDim2.new(0.188, 0, -0.008, 0)
+textlab.Size = UDim2.new(0.65, 0, 0.2, 0)
+textlab.BackgroundTransparency = 1
+textlab.TextColor3 = Color3.fromHex("#903e99")
+textlab.TextScaled = true
+textlab.Text = "Auto Trade by CheeryOdin"
+--textlab0 params
+textlab0.Position = UDim2.new(0.219, 0, 0.176, 0)
+textlab0.Size = UDim2.new(0.586, 0, 0.112, 0)
+textlab0.BackgroundTransparency = 1
+textlab0.TextColor3 = Color3.fromHex("#903e99")
+textlab0.TextScaled = true
+textlab0.Text = "Choose Role:"
+textlab0.FontFace.Bold = true
+--textlab1 params
+textlab1.Position = UDim2.new(-0.057, 0, 0.85, 0)
+textlab1.Size = UDim2.new(0.586, 0, 0.112, 0)
+textlab1.BackgroundTransparency = 1
+textlab1.TextColor3 = Color3.fromHex("#903e99")
+textlab1.TextScaled = true
+textlab1.Text = "*if role is giver"
+--textlab2 params
+textlab2.Position = UDim2.new(0.509, 0, 0.634, 0)
+textlab2.Size = UDim2.new(0.329, 0, 0.157, 0)
+textlab2.BackgroundTransparency = 1
+textlab2.TextColor3 = Color3.fromHex("#903e99")
+textlab2.TextScaled = true
+textlab2.Text = "Board Nums guide:"
+textlab2.FontFace.Bold = true
+--plrbox params
+plrbox.Position = UDim2.new(0.038, 0, 0.496, 0)
+plrbox.Size = UDim2.new(0.445, 0, 0.13, 0)
+plrbox.TextScaled = true
+plrbox.PlaceholderText = "Player Name"
+plrbox.PlaceholderColor3 = Color3.fromHex("#bc9cc8")
+plrbox.Text = ""
+plrbox.TextColor3 = Color3.fromHex("#903e99")
+plrbox.BackgroundColor3 = Color3.fromHex("#ffffff")
+local grad0 = Instance.new("UIGradient", plrbox)
+local corn0 = Instance.new("UICorner", plrbox)
+grad0.Color = gradbut
+grad0.Rotation = 84
+grad0.Transparency = NumberSequence.new(0.2)
+corn0.CornerRadius = UDim.new(0.1,0)
+--brdbox params
+brdbox.Position = UDim2.new(0.53, 0, 0.496, 0)
+brdbox.Size = UDim2.new(0.445, 0, 0.13, 0)
+brdbox.TextScaled = true
+brdbox.PlaceholderText = "Board Number"
+brdbox.PlaceholderColor3 = Color3.fromHex("#bc9cc8")
+brdbox.Text = ""
+brdbox.TextColor3 = Color3.fromHex("#903e99")
+brdbox.BackgroundColor3 = Color3.fromHex("#ffffff")
+local grad1 = Instance.new("UIGradient", brdbox)
+local corn1 = Instance.new("UICorner", brdbox)
+grad1.Color = gradbut
+grad1.Rotation = 84
+grad1.Transparency = NumberSequence.new(0.2)
+corn1.CornerRadius = UDim.new(0.1,0)
+--itmbox params
+itmbox.Position = UDim2.new(0.038, 0, 0.722, 0)
+itmbox.Size = UDim2.new(0.445, 0, 0.13, 0)
+itmbox.TextScaled = true
+itmbox.PlaceholderText = "ItemName"
+itmbox.PlaceholderColor3 = Color3.fromHex("#bc9cc8")
+itmbox.Text = ""
+itmbox.TextColor3 = Color3.fromHex("#903e99")
+itmbox.BackgroundColor3 = Color3.fromHex("#ffffff")
+local grad2 = Instance.new("UIGradient", itmbox)
+local corn2 = Instance.new("UICorner", itmbox)
+grad2.Color = gradbut
+grad2.Rotation = 84
+grad2.Transparency = NumberSequence.new(0.2)
+corn2.CornerRadius = UDim.new(0.1,0)
+--setbut params
+setbut.Position = UDim2.new(0, 0, -0.005, 0)
+setbut.Size = UDim2.new(0.151, 0, 0.181, 0)
+setbut.BackgroundTransparency = 1
+setbut.HoverImage = "rbxassetid://6918434507"
+setbut.Image = "rbxassetid://2484556379"
+setbut.ImageColor3 = Color3.fromHex("#9c39ff")
+local function Change()
+	frameset.Visible = not frameset.Visible
+end
+setbut.MouseButton1Up:Connect(Change)
+--guidebut params
+guidebut.Position = UDim2.new(0.826, 0, 0.643, 0)
+guidebut.Size = UDim2.new(0.118, 0, 0.149, 0)
+guidebut.BackgroundTransparency = 0.2
+guidebut.Image = "rbxassetid://115745994221305"
+guidebut.ImageColor3 = Color3.fromHex("#9c39ff")
+guidebut.BackgroundColor3 = Color3.fromHex("#ffffff")
+local corn3 = Instance.new("UICorner", guidebut)
+corn3.CornerRadius = UDim.new(0.1, 0)
+local grad3 = Instance.new("UIGradient", guidebut)
+grad3.Color = gradbut
+grad3.Rotation = 84
+grad3.Transparency = NumberSequence.new(0.2)
+local function Change1()
+	guide.Visible = not guide.Visible
+end
+guidebut.MouseButton1Up:Connect(Change1)
+--frameset params
+frameset.Position = UDim2.new(0.409, 0, 0.559, 0)
+frameset.Size = UDim2.new(0.265, 0, 0.431, 0)
+frameset.Visible = false
+local grad4 = Instance.new("UIGradient", frameset)
+grad4.Color = gradfr
+grad4.Rotation = 70
+grad4.Transparency = NumberSequence.new(0.5)
+local corn4 = Instance.new("UICorner", frameset)
+corn4.CornerRadius = UDim.new(0.05,0)
+Instance.new("UIDragDetector", frameset)
+local tpbut = Instance.new("TextButton", frameset)
+local legitbut = Instance.new("TextButton", frameset)
+local textlab3 = Instance.new("TextLabel", frameset)
+local textlab4 = Instance.new("TextLabel", frameset)
+--textlab3 params
+textlab3.Position = UDim2.new(0.206, 0, 0.055, 0)
+textlab3.Size = UDim2.new(0.586, 0, 0.112, 0)
+textlab3.BackgroundTransparency = 1
+textlab3.TextColor3 = Color3.fromHex("#903e99")
+textlab3.TextScaled = true
+textlab3.Text = "Settings"
+--textlab4 params
+textlab4.Position = UDim2.new(0.204, 0, 0.169, 0)
+textlab4.Size = UDim2.new(0.586, 0, 0.112, 0)
+textlab4.BackgroundTransparency = 1
+textlab4.TextColor3 = Color3.fromHex("#903e99")
+textlab4.TextScaled = true
+textlab4.Text = "Choose Mode:"
+textlab4.FontFace.Bold = true
+--tpbut params
+tpbut.Position = UDim2.new(0.523, 0, 0.282, 0)
+tpbut.Size = UDim2.new(0.451, 0, 0.155, 0)
+tpbut.Text = "TP"
+tpbut.TextScaled = true
+tpbut.TextColor3 = Color3.fromHex("#903e99")
+local grad5 = Instance.new("UIGradient", tpbut)
+local corn5 = Instance.new("UICorner", tpbut)
+grad5.Color = gradbut
+grad5.Rotation = 84
+grad5.Transparency = NumberSequence.new(0.2)
+corn5.CornerRadius = UDim.new(0.1,0)
+tpbut.BackgroundColor3 = Color3.fromHex("#ffffff")
+tpbut.MouseButton1Up:Connect(function()
+	tpbut.BackgroundColor3 = Color3.fromHex("#9c9c9c")
+	legitbut.BackgroundColor3 = Color3.fromHex("#ffffff")
+end)
+--legitbut params
+legitbut.Position = UDim2.new(0.046, 0, 0.282, 0)
+legitbut.Size = UDim2.new(0.451, 0, 0.155, 0)
+legitbut.Text = "Legit"
+legitbut.TextScaled = true
+legitbut.TextColor3 = Color3.fromHex("#903e99")
+local grad6 = Instance.new("UIGradient", legitbut)
+local corn6 = Instance.new("UICorner", legitbut)
+grad6.Color = gradbut
+grad6.Rotation = 84
+grad6.Transparency = NumberSequence.new(0.2)
+corn6.CornerRadius = UDim.new(0.1,0)
+legitbut.BackgroundColor3 = Color3.fromHex("#9c9c9c")
+legitbut.MouseButton1Up:Connect(function()
+	legitbut.BackgroundColor3 = Color3.fromHex("#9c9c9c")
+	tpbut.BackgroundColor3 = Color3.fromHex("#ffffff")
+end)
+--guide params
+guide.Position = UDim2.new(0.2, 0, 0.146, 0)
+guide.Size = UDim2.new(0.599, 0, 0.686, 0)
+guide.Image = "rbxassetid://82031271054874"
+guide.Visible = false
+local closebut = Instance.new("ImageButton", guide)
+--closebut params
+closebut.Position = UDim2.new(0.935, 0, 0.007, 0)
+closebut.Size = UDim2.new(0.064, 0, 0.1, 0)
+closebut.BackgroundTransparency = 1
+closebut.Image = "rbxassetid://18209598048"
+closebut.HoverImage = "rbxassetid://751603341"
+closebut.MouseButton1Up:Connect(Change1)
+--giverbut params
+giverbut.Position = UDim2.new(0.033, 0, 0.276, 0)
+giverbut.Size = UDim2.new(0.451, 0, 0.155, 0)
+giverbut.Text = "Giver"
+giverbut.TextScaled = true
+giverbut.TextColor3 = Color3.fromHex("#903e99")
+local grad7 = Instance.new("UIGradient", giverbut)
+local corn7 = Instance.new("UICorner", giverbut)
+grad7.Color = gradbut
+grad7.Rotation = 84
+grad7.Transparency = NumberSequence.new(0.2)
+corn7.CornerRadius = UDim.new(0.1,0)
+giverbut.BackgroundColor3 = Color3.fromHex("#9c9c9c")
+giverbut.MouseButton1Up:Connect(function()
+	giverbut.BackgroundColor3 = Color3.fromHex("#9c9c9c")
+	recbut.BackgroundColor3 = Color3.fromHex("#ffffff")
+end)
+--recbut params
+recbut.Position = UDim2.new(0.525, 0, 0.276, 0)
+recbut.Size = UDim2.new(0.451, 0, 0.155, 0)
+recbut.Text = "Receiver"
+recbut.TextScaled = true
+recbut.TextColor3 = Color3.fromHex("#903e99")
+local grad8 = Instance.new("UIGradient", recbut)
+local corn8 = Instance.new("UICorner", recbut)
+grad8.Color = gradbut
+grad8.Rotation = 84
+grad8.Transparency = NumberSequence.new(0.2)
+corn8.CornerRadius = UDim.new(0.1,0)
+recbut.BackgroundColor3 = Color3.fromHex("#ffffff")
+recbut.MouseButton1Up:Connect(function()
+	recbut.BackgroundColor3 = Color3.fromHex("#9c9c9c")
+	giverbut.BackgroundColor3 = Color3.fromHex("#ffffff")
+end)
+--startbut params
+startbut.Position = UDim2.new(0.52, 0, 0.816, 0)
+startbut.Size = UDim2.new(0.451, 0, 0.155, 0)
+startbut.Text = "Start"
+startbut.TextScaled = true
+startbut.TextColor3 = Color3.fromHex("#903e99")
+startbut.BackgroundColor3 = Color3.fromHex("#ffffff")
+local grad9 = Instance.new("UIGradient", startbut)
+local corn9 = Instance.new("UICorner", startbut)
+grad9.Color = gradbut
+grad9.Rotation = 84
+grad9.Transparency = NumberSequence.new(0.2)
+corn9.CornerRadius = UDim.new(0.1,0)
+startbut.MouseButton1Up:Connect(function()
+	print("startbut func")
+	if not inboard.Value then
+		boardnum = tonumber(brdbox.Text)
+		board = workspace.Boards:GetChildren()[boardnum]
+		if giverbut.BackgroundColor3 == Color3.fromHex("#9c9c9c") then
+			role = "Giver"
+			controls = board:GetChildren()[2]
+		else
+			role = "Receiver"
+			controls = board:GetChildren()[1]
+		end
+		item = itmbox.Text
+		plr2 = plrbox.Text
+		if legitbut.BackgroundColor3 == Color3.fromHex("9c9c9c") then
+			legitmode = true
+		else
+			legitmode = false
+		end
+		if role == "Giver" then
+			giver()
+		else
+			receiver()
+		end
+		startbut.Text = "Stop"
+	else
+		panic()
+	end
+	items = 0
+	print(started.Value, inboard.Value)
+end)
+inboard:GetPropertyChangedSignal("Value"):Connect(function()
+	if not inboard.Value then
+		startbut.Text = "Start"
+	end
+end)
