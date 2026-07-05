@@ -6,6 +6,7 @@ local controls
 local started = Instance.new("BoolValue", chr)
 local inboard = Instance.new("BoolValue", chr)
 local items = 0
+local spawn = workspace.Map.SpawnLocation
 --some core func
 local function goto(destination)
 	print("goto func")
@@ -19,7 +20,7 @@ local function goto(destination)
 		task.wait(0.1)
 		chr.PrimaryPart.Anchored = true
 		task.wait(0.1)
-		if destination == workpsace.Map.SpawnLocation then
+		if destination == spawn then
 			chr.PrimaryPart.Anchored = false
 		end
 	end
@@ -29,7 +30,7 @@ local function panic()
 	inboard.Value = false
 	started.Value = false
 	task.wait(0.1)
-	goto(workspace.Map.SpawnLocation)
+	goto(spawn)
 end
 local function check()
 	print("check func")
