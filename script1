@@ -51,22 +51,24 @@ end
 local function itemsCheck(plr)
 	print("itemcheck func")
 	for _, v in workspace.Dropped:GetChildren() do
-		if v.Owner.Value == plr then
-			items += 1
+		if v:FindFirstChild("Owner") then
+			if v.Owner.Value == plr then
+				items += 1
+			end
 		end
 	end
 end
 local function Drop()
 	print("drop func")
 	if items < 15 then
-		for i=1,math.clamp(game.Players.LocalPlayer.Items[item].Value, 0, 15-items) do
+		for i=1,math.clamp(plr.Items[item].Value, 0, 15-items) do
 			Events.Get("Equip"):FireServer(item)
 			Events.Get("LocalEquip"):Fire(item)
 			task.wait(0.2)
 			Events.Get("Drop"):FireServer(item)
 			task.wait(0.2)
 		end
-		itemsCheck(game.Players.LocalPlayer)
+		itemsCheck(plr)
 		if 15-items ~= 0 then
 			Drop()
 		end
@@ -90,7 +92,7 @@ local function giver()
 		check()
 	else
 		if not inboard.Value then panic(); return end
-		if not game.Players.LocalPlayer.Items:FindFirstChild(item) or game.Players.LocalPlayer.Items[item].Value < 15 then
+		if not plr.Items:FindFirstChild(item) then
 			inboard.Value = false
 			started.Value = false
 			panic()
@@ -426,7 +428,11 @@ startbut.MouseButton1Up:Connect(function()
 		board = workspace.Boards:GetChildren()[boardnum]
 		if giverbut.BackgroundColor3 == Color3.fromHex("#9c9c9c") then
 			role = "Giver"
-			controls = board:GetChildren()[2]
+			if boardnum == 4 or boardnum == 8 then
+				controls = board:GetChildren()[4]
+			else
+				controls = board:GetChildren()[2]
+			end
 		else
 			role = "Receiver"
 			controls = board:GetChildren()[1]
